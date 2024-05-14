@@ -1,12 +1,9 @@
 // routes/index.js
 import express from 'express';
-import AuthController from '../controllers/AuthController';
-import UsersController from '../controllers/UsersController';
+import FilesController from '../controllers/FilesController';
 
 const router = express.Router();
 
-router.get('/connect', AuthController.getConnect);
-router.get('/disconnect', AuthController.getDisconnect);
-router.get('/users/me', UserController.getMe);
+router.post('/files', FilesController.postUpload);
 
 export default router;
