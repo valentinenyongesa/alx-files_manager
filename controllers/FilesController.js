@@ -3,7 +3,9 @@ import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
 const FilesController = {
-  getShow: async (req, res) => {
+  // Other methods...
+
+  putPublish: async (req, res) => {
     const { id } = req.params;
     const token = req.headers['x-token'];
 
@@ -24,11 +26,15 @@ const FilesController = {
       return res.status(404).json({ error: 'Not found' });
     }
 
-    return res.json(file);
+    await dbClient.files.updateOne({ _id: id }, { $set: { isPublic: true } });
+
+    const updatedFile = { ...file, isPublic: true };
+
+    return res.json(updatedFile);
   },
 
-  getIndex: async (req, res) => {
-    const { parentId = '0', page = 0 } = req.query;
+  putUnpublish: async (req, res) => {
+    const { id } = req.params;
     const token = req.headers['x-token'];
 
     if (!token) {
@@ -42,10 +48,17 @@ const FilesController = {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const skip = parseInt(page) * 20;
-    const files = await dbClient.files.find({ parentId, userId }).limit(20).skip(skip).toArray();
+    const file = await dbClient.files.findOne({ _id: id, userId });
 
-    return res.json(files);
+    if (!file) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    await dbClient.files.updateOne({ _id: id }, { $set: { isPublic: false } });
+
+    const updatedFile = { ...file, isPublic: false };
+
+    return res.json(updatedFile);
   },
 };
 
