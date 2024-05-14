@@ -1,29 +1,14 @@
 // controllers/UsersController.js
-import redisClient from '../utils/redis';
-import dbClient from '../utils/db';
+const User = require('../models/User');
+const userQueue = require('../utils/userQueue');
 
-const UsersController = {
-  getMe: async (req, res) => {
-    const token = req.headers['x-token'];
-    if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+async function postUser(req, res) {
+  // Process user creation and store user in the database
+  // ...
+  
+  // Add job to userQueue for sending welcome email
+  await userQueue.add({ userId: newUser.id });
 
-    const key = `auth_${token}`;
-    const userId = await redisClient.get(key);
-
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const user = await dbClient.users.findOne({ _id: userId });
-
-    if (!user) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    return res.status(200).json({ id: user._id, email: user.email });
-  },
-};
-
-export default UsersController;
+  // Return response
+  res.status(201).json(newUser);
+}

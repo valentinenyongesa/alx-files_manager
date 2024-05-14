@@ -1,34 +1,19 @@
 // worker.js
+const userQueue = require('./utils/userQueue');
+const User = require('./models/User');
 
-import Bull from 'bull';
-
-const fileQueue = new Bull('fileQueue');
-
-fileQueue.process(async (job) => {
-  const { userId, fileId } = job.data;
-
-  if (!fileId) {
-    throw new Error('Missing fileId');
-  }
+userQueue.process(async (job) => {
+  const { userId } = job.data;
 
   if (!userId) {
     throw new Error('Missing userId');
   }
 
-  const file = await dbClient.files.findOne({ _id: fileId, userId: userId });
+  const user = await User.findById(userId);
 
-  if (!file) {
-    throw new Error('File not found');
+  if (!user) {
+    throw new Error('User not found');
   }
 
-  const filePath = path.join(process.env.FOLDER_PATH || '/tmp/files_manager', file.id);
-  const imageSizes = [500, 250, 100];
-
-  for (const size of imageSizes) {
-    await generateThumbnail(filePath, size);
-  }
+  console.log(`Welcome ${user.email}!`);
 });
-
-async function generateThumbnail(filePath, size) {
-  // Use image-thumbnail module to generate thumbnails
-}
